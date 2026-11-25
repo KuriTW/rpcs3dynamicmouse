@@ -147,6 +147,16 @@ private:
 	int m_deadzone_y = 60;
 	double m_multi_x = 2;
 	double m_multi_y = 2.5;
+	bool m_dynamic_mouse_acceleration = false;
+	double m_dynamic_mouse_max_gain = 2.5;
+	double m_dynamic_mouse_start_speed = 700.0;
+	double m_dynamic_mouse_curve_exponent = 1.5;
+	steady_clock::time_point m_last_mouse_sample_time{};
+	int m_last_absolute_mouse_x = 0;
+	int m_last_absolute_mouse_y = 0;
+	bool m_has_mouse_sample = false;
+	bool m_has_absolute_mouse_sample = false;
+	double get_mouse_dynamic_gain(int movement_x, int movement_y, bool movement_is_absolute);
 
 	// Mousewheel
 	steady_clock::time_point m_last_wheel_move_up;

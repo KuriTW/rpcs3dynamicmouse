@@ -7,6 +7,7 @@
 #include "rpcs3qt/gs_frame.h"
 
 #include <algorithm>
+#include <cmath>
 #include <QApplication>
 
 bool keyboard_pad_handler::Init()
@@ -676,8 +677,9 @@ void keyboard_pad_handler::mouseMoveEvent(QMouseEvent* event)
 
 	static int movement_x = 0;
 	static int movement_y = 0;
+	const bool mouse_locked = m_target && m_target->isActive() && get_mouse_lock_state();
 
-	if (m_target && m_target->isActive() && get_mouse_lock_state())
+	if (mouse_locked)
 	{
 		// get the screen dimensions
 		const QSize screen = m_target->size();
@@ -745,8 +747,10 @@ void keyboard_pad_handler::mouseMoveEvent(QMouseEvent* event)
 		movement_y = p_delta.y();
 	}
 
-	movement_x *= m_multi_x;
-	movement_y *= m_multi_y;
+	const bool movement_is_absolute = m_mouse_movement_mode == mouse_movement_mode::absolute && !mouse_locked;
+	const double dynamic_gain = get_mouse_dynamic_gain(movement_x, movement_y, movement_is_absolute);
+	movement_x = static_cast<int>(movement_x * dynamic_gain * m_multi_x);
+	movement_y = static_cast<int>(movement_y * dynamic_gain * m_multi_y);
 
 	int deadzone_x = 0;
 	int deadzone_y = 0;
@@ -802,6 +806,71 @@ void keyboard_pad_handler::mouseMoveEvent(QMouseEvent* event)
 	}
 
 	event->ignore();
+}
+
+double keyboard_pad_handler::get_mouse_dynamic_gain(int movement_x, int movement_y, bool movement_is_absolute)
+{
+	if (!m_dynamic_mouse_acceleration)
+	{
+		m_has_mouse_sample = false;
+		m_has_absolute_mouse_sample = false;
+		return 1.0;
+	}
+
+	int sample_x = movement_x;
+	int sample_y = movement_y;
+
+	if (movement_is_absolute)
+	{
+		if (m_has_absolute_mouse_sample)
+		{
+			sample_x -= m_last_absolute_mouse_x;
+			sample_y -= m_last_absolute_mouse_y;
+		}
+		else
+		{
+			sample_x = 0;
+			sample_y = 0;
+			m_has_absolute_mouse_sample = true;
+		}
+
+		m_last_absolute_mouse_x = movement_x;
+		m_last_absolute_mouse_y = movement_y;
+	}
+	else
+	{
+		// Avoid comparing a new absolute sample against stale coordinates after a
+		// movement-mode or mouse-lock transition.
+		m_has_absolute_mouse_sample = false;
+	}
+
+	const auto now = steady_clock::now();
+	if (!m_has_mouse_sample)
+	{
+		m_last_mouse_sample_time = now;
+		m_has_mouse_sample = true;
+		return 1.0;
+	}
+
+	double elapsed_seconds = std::chrono::duration<double>(now - m_last_mouse_sample_time).count();
+	m_last_mouse_sample_time = now;
+	if (elapsed_seconds > 0.250)
+	{
+		// Treat the first event after a pause as a fresh sample. Clamping a long
+		// pause to 250 ms would overestimate speed and could cause a sudden gain jump.
+		return 1.0;
+	}
+	elapsed_seconds = std::max(elapsed_seconds, 0.001);
+
+	const double distance = std::hypot(static_cast<double>(sample_x), static_cast<double>(sample_y));
+	const double speed = distance / elapsed_seconds;
+	const double start_speed = std::max(1.0, m_dynamic_mouse_start_speed);
+	const double normalized_speed = std::clamp((speed - start_speed) / start_speed, 0.0, 1.0);
+	const double curve = std::clamp(m_dynamic_mouse_curve_exponent, 0.25, 4.0);
+	const double amount = std::pow(normalized_speed, curve);
+	const double max_gain = std::max(1.0, m_dynamic_mouse_max_gain);
+
+	return 1.0 + (max_gain - 1.0) * amount;
 }
 
 void keyboard_pad_handler::mouseWheelEvent(QWheelEvent* event)
@@ -1124,6 +1193,12 @@ bool keyboard_pad_handler::bindPadToDevice(std::shared_ptr<Pad> pad)
 	m_deadzone_y = cfg->mouse_deadzone_y;
 	m_multi_x = cfg->mouse_acceleration_x / 100.0;
 	m_multi_y = cfg->mouse_acceleration_y / 100.0;
+	m_dynamic_mouse_acceleration = cfg->mouse_dynamic_acceleration;
+	m_dynamic_mouse_max_gain = cfg->mouse_dynamic_max_gain / 100.0;
+	m_dynamic_mouse_start_speed = cfg->mouse_dynamic_start_speed;
+	m_dynamic_mouse_curve_exponent = cfg->mouse_dynamic_curve_exponent / 100.0;
+	m_has_mouse_sample = false;
+	m_has_absolute_mouse_sample = false;
 	m_l_stick_lerp_factor = cfg->l_stick_lerp_factor / 100.0f;
 	m_r_stick_lerp_factor = cfg->r_stick_lerp_factor / 100.0f;
 	m_analog_lerp_factor  = cfg->analog_lerp_factor / 100.0f;

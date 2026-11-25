@@ -149,6 +149,10 @@ struct cfg_pad final : cfg::node
 	cfg::uint<0, 255> mouse_deadzone_y{ this, "Mouse Deadzone Y Axis", 60 };
 	cfg::uint<0, 999999> mouse_acceleration_x{ this, "Mouse Acceleration X Axis", 200 };
 	cfg::uint<0, 999999> mouse_acceleration_y{ this, "Mouse Acceleration Y Axis", 250 };
+	cfg::_bool mouse_dynamic_acceleration{ this, "Mouse Dynamic Acceleration", false };
+	cfg::uint<100, 800> mouse_dynamic_max_gain{ this, "Mouse Dynamic Maximum Gain (%)", 250 };
+	cfg::uint<50, 5000> mouse_dynamic_start_speed{ this, "Mouse Dynamic Start Speed (pixels/sec)", 700 };
+	cfg::uint<25, 400> mouse_dynamic_curve_exponent{ this, "Mouse Dynamic Curve Exponent", 150 };
 
 	cfg::uint<0, 100> l_stick_lerp_factor{ this, "Left Stick Lerp Factor", 100 };
 	cfg::uint<0, 100> r_stick_lerp_factor{ this, "Right Stick Lerp Factor", 100 };

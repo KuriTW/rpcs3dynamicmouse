@@ -1428,6 +1428,21 @@ void pad_settings_dialog::UpdateLabels(bool is_reset)
 		ui->mouse_accel_y->setRange(std::stod(range.front()) / 100.0, std::stod(range.back()) / 100.0);
 		ui->mouse_accel_y->setValue(cfg.mouse_acceleration_y / 100.0);
 
+		// Update Dynamic Mouse Acceleration
+		ui->gb_mouse_dynamic_accel->setChecked(cfg.mouse_dynamic_acceleration);
+
+		range = cfg.mouse_dynamic_max_gain.to_list();
+		ui->mouse_dynamic_max_gain->setRange(std::stoi(range.front()), std::stoi(range.back()));
+		ui->mouse_dynamic_max_gain->setValue(cfg.mouse_dynamic_max_gain);
+
+		range = cfg.mouse_dynamic_start_speed.to_list();
+		ui->mouse_dynamic_start_speed->setRange(std::stoi(range.front()), std::stoi(range.back()));
+		ui->mouse_dynamic_start_speed->setValue(cfg.mouse_dynamic_start_speed);
+
+		range = cfg.mouse_dynamic_curve_exponent.to_list();
+		ui->mouse_dynamic_curve->setRange(std::stod(range.front()) / 100.0, std::stod(range.back()) / 100.0);
+		ui->mouse_dynamic_curve->setValue(cfg.mouse_dynamic_curve_exponent / 100.0);
+
 		// Update Stick Lerp Factors
 		range = cfg.l_stick_lerp_factor.to_list();
 		ui->left_stick_lerp->setRange(std::stod(range.front()) / 100.0, std::stod(range.back()) / 100.0);
@@ -1522,6 +1537,7 @@ void pad_settings_dialog::SwitchButtons(bool is_enabled)
 	ui->b_led_settings->setEnabled(is_enabled && m_enable_led);
 	ui->gb_mouse_movement->setEnabled(is_enabled && m_handler->m_type == pad_handler::keyboard);
 	ui->gb_mouse_accel->setEnabled(is_enabled && m_handler->m_type == pad_handler::keyboard);
+	ui->gb_mouse_dynamic_accel->setEnabled(is_enabled && m_handler->m_type == pad_handler::keyboard);
 	ui->gb_mouse_dz->setEnabled(is_enabled && m_handler->m_type == pad_handler::keyboard);
 	ui->gb_stick_lerp->setEnabled(is_enabled && m_handler->m_type == pad_handler::keyboard);
 	ui->chooseClass->setEnabled(is_enabled && ui->chooseClass->count() > 0);
@@ -2351,6 +2367,10 @@ void pad_settings_dialog::ApplyCurrentPlayerConfig(int new_player_id)
 		cfg.mouse_acceleration_y.set(ui->mouse_accel_y->value() * 100);
 		cfg.mouse_deadzone_x.set(ui->mouse_dz_x->value());
 		cfg.mouse_deadzone_y.set(ui->mouse_dz_y->value());
+		cfg.mouse_dynamic_acceleration.set(ui->gb_mouse_dynamic_accel->isChecked());
+		cfg.mouse_dynamic_max_gain.set(ui->mouse_dynamic_max_gain->value());
+		cfg.mouse_dynamic_start_speed.set(ui->mouse_dynamic_start_speed->value());
+		cfg.mouse_dynamic_curve_exponent.set(ui->mouse_dynamic_curve->value() * 100);
 		cfg.l_stick_lerp_factor.set(ui->left_stick_lerp->value() * 100);
 		cfg.r_stick_lerp_factor.set(ui->right_stick_lerp->value() * 100);
 	}
@@ -2577,6 +2597,7 @@ void pad_settings_dialog::SubscribeTooltips()
 	SubscribeTooltip(ui->gb_triggers, tooltips.gamepad_settings.trigger_deadzones);
 	SubscribeTooltip(ui->gb_stick_lerp, tooltips.gamepad_settings.stick_lerp);
 	SubscribeTooltip(ui->gb_mouse_accel, tooltips.gamepad_settings.mouse_acceleration);
+	SubscribeTooltip(ui->gb_mouse_dynamic_accel, tooltips.gamepad_settings.mouse_dynamic_acceleration);
 	SubscribeTooltip(ui->gb_mouse_dz, tooltips.gamepad_settings.mouse_deadzones);
 	SubscribeTooltip(ui->gb_mouse_movement, tooltips.gamepad_settings.mouse_movement);
 

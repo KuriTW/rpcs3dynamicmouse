@@ -1194,6 +1194,70 @@
                  </widget>
                 </item>
                 <item>
+                 <widget class="QGroupBox" name="gb_mouse_dynamic_accel">
+                  <property name="title">
+                   <string>Dynamic Mouse Acceleration</string>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                  <property name="checked">
+                   <bool>false</bool>
+                  </property>
+                  <layout class="QFormLayout" name="gb_mouse_dynamic_accel_layout">
+                   <property name="leftMargin">
+                    <number>5</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>5</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>5</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>5</number>
+                   </property>
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="mouse_dynamic_max_gain_label">
+                     <property name="text">
+                      <string>Maximum gain (%)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QSpinBox" name="mouse_dynamic_max_gain"/>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="mouse_dynamic_start_speed_label">
+                     <property name="text">
+                      <string>Acceleration starts (pixels/sec)</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QSpinBox" name="mouse_dynamic_start_speed"/>
+                   </item>
+                   <item row="2" column="0">
+                    <widget class="QLabel" name="mouse_dynamic_curve_label">
+                     <property name="text">
+                      <string>Curve exponent</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="2" column="1">
+                    <widget class="QDoubleSpinBox" name="mouse_dynamic_curve">
+                     <property name="decimals">
+                      <number>2</number>
+                     </property>
+                     <property name="singleStep">
+                      <double>0.250000000000000</double>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QGroupBox" name="gb_mouse_dz">
                   <property name="title">
                    <string>Mouse Deadzone</string>
