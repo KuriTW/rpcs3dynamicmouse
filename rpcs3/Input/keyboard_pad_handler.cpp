@@ -1193,7 +1193,7 @@ bool keyboard_pad_handler::bindPadToDevice(std::shared_ptr<Pad> pad)
 	m_deadzone_y = cfg->mouse_deadzone_y;
 	m_multi_x = cfg->mouse_acceleration_x / 100.0;
 	m_multi_y = cfg->mouse_acceleration_y / 100.0;
-	m_dynamic_mouse_acceleration = cfg->mouse_dynamic_acceleration;
+	m_dynamic_mouse_acceleration = cfg->mouse_dynamic_acceleration.get();
 	m_dynamic_mouse_max_gain = cfg->mouse_dynamic_max_gain / 100.0;
 	m_dynamic_mouse_start_speed = cfg->mouse_dynamic_start_speed;
 	m_dynamic_mouse_curve_exponent = cfg->mouse_dynamic_curve_exponent / 100.0;
